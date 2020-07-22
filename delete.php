@@ -1,19 +1,28 @@
 <?php
-    ob_start();
 
-    try{
-    $user_id = filter_input(INPUT_GET, 'id');
+session_start();
 
-    require_once('connect.php');
-    $sql = 'DELETE FROM developer_info WHERE id = :user_id';
-    $statement = $db->prepare($sql);
-    $statement->bindParam(':user_id', $user_id);
-    $statement->execute();  
-    header('location:view.php');
+$id = $_SESSION['id'];
 
-    }catch(PDOException $e) {
-        $error_message = $e->getMessage(); 
-        echo "<p> $errormessage </p>"; 
-    }
-    ob_flush();
+require_once('connect.php');
+
+$sql = 'DELETE FROM credential WHERE id = :id';
+
+$statement = $db->prepare($sql);
+$statement->bindValue(':id', $id);
+$statement->execute();
+$statement->closeCursor();
+
+
+$sql = 'DELETE FROM user_info WHERE id = :id';
+
+$statement = $db->prepare($sql);
+$statement->bindValue(':id', $id);
+$statement->execute();
+$statement->closeCursor();
+
+$_SESSION['isLogin'] = null;
+$_SESSION['register_status'] = null;
+
+header('location:view.php');
 ?>

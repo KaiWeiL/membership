@@ -1,60 +1,49 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-
-<?php 
-    $id = filter_input(INPUT_GET, 'id');
-    $fname = null;
-    $lname = null;
-    $email = null;
-    $city = null;
-    $skills = null;
-    if(!empty($id)){
-        try{
-        require_once('connect.php');
-        $sql = 'SELECT * FROM developer_info WHERE id = :id';
-        $statement = $db->prepare($sql);
-        $statement->bindValue('id', $id);
-        $statement->execute();
-        $record = $statement->fetch();
-        
-        $fname = $record['first_name'];
-        $lname = $record['last_name'];
-        $email = $record['email'];
-        $city = $record['current_city'];
-        $skills = $record['skills'];
-        }catch(PDOException $e){
-            echo $e->getMessage();
-        }
-    }
+<?php
+    session_start();
+    if(isset($_SESSION['isLogin'])){
 ?>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>COMP1006 - Lab 9 - Summer 2020 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Piedra&family=Quicksand&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+    <header>
+      <h1> COMP1006 - Lab Nine!</h1>
+    </header>
+    <main>
+    <?php         
+        echo '<h2>Welcome! '.$_SESSION['user_first_name'].' </h2>';          
+        echo  '<nav>'.
+            '<ul>'.
+                '<li><a href="view.php?id="'.$_SESSION['id'].'">Modify Your Information</a></li>'.
+                '<li><a href="session_destroy.php">Logout</a></li>'.
+            '</ul>'.
+        '</nav>';
+    }else{    
+        echo '<h2>Welcome to the community!</h2>'.
+             '<h3>Let\'s Join and Incorporate!</h3>';
+        echo  '<nav>'.
+            '<ul>'.
+                '<li><a href="login.php">Login</a></li>'.
+                '<li><a href="register.php">Register</a></li>'.
+            '</ul>'.
+        '</nav>';
+        $_SESSION['isLogin'] = null;
+        
 
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="style.css">
-        <title>Developer Network</title>
-    </head>
-    
-        <form action="process.php" method="post">   
-            <h1>Join the Network</h1>
-            <h2>Have a connection with thousands of developers</h2>
-            <label for="fname">First Name </lable>
-            <input type="text" name="fname" class="item fname" id="fname" value="<?php echo $fname; ?>">
-            <label for="lname">Last Name </lable>
-            <input type="text" name="lname" class="item lname" id="lname" value="<?php echo $lname; ?>">
-            <lable for="email">Email </lable>
-            <input type="email" name="email" class="item email" id="email" value="<?php echo $email; ?>"> <!-- check the validity of email address -->
-            <label for="city"> City </label>
-            <input type="text" name="city" class="item city" id="city" value="<?php echo $city; ?>">
-            <p>What are your skills?</p>
-            <textarea name="skills" class="item skills" id="skills" maxlength="80" value="<?php echo $skills; ?>"></textarea> <!-- Set the front-end character length checker for overflow -->
-            <input type="submit" name="submit" class="submit" id="submit" value="Submit">
-            
-            <p><a href="review.html">Project Review</a></p>
-        </form>
-    
+    }?>
 
+        
+    </main>
+    <footer>
+      <p> &copy; 2020 COMP1006 - Lab Nine </p>
+    </footer>
+   </div><!--end container-->
+  </body>
+</html>
