@@ -16,27 +16,32 @@
 
     //A series of input verification
     if (empty($first_name) || empty($last_name)) {
-        $_SESSION['login_err'] = "Please provide both first and last name!";
+        $_SESSION['login_err'][0] = "Please provide both first and last name!";
         $ok = false;
         header('location:register.php');
-    }else if (empty($email)) {
-        $_SESSION['login_err'] = "Email cannot be empty!";
+    }
+    if (empty($email)) {
+        $_SESSION['login_err'][1] = "Email cannot be empty!";
         $ok = false;
         header('location:register.php');
-    }else if(empty($account)){
-        $_SESSION['login_err'] = "Account Name Empty!";
+    }
+    if(empty($account)){
+        $_SESSION['login_err'][2] = "Account Name Empty!";
         $ok = false;
         header('location:register.php');
-    }else if(empty($password)){
-        $_SESSION['login_err'] = "Password Empty!";
+    }
+    if(empty($password)){
+        $_SESSION['login_err'][3] = "Password Empty!";
         $ok = false;
         header('location:register.php');
-    }else if(empty($cfpassword)){
-        $_SESSION['login_err'] = "Please confirm the password!";
+    }
+    if(empty($cfpassword)){
+        $_SESSION['login_err'][4] = "Please confirm the password!";
         $ok = false;
         header('location:register.php');
-    }else if($cfpassword != $password){
-        $_SESSION['login_err'] = "Password does not match with confirm password!";
+    }
+    if($cfpassword != $password){
+        $_SESSION['login_err'][5]= "Password does not match with confirm password!";
         $ok = false;
         header('location:register.php');
     }
@@ -44,34 +49,43 @@
     if($ok === true){
         require_once('connect.php');
         
-        $query = "SELECT * FROM credential WHERE account = :account";
-        
-        $statement = $db->prepare($query);
-        $statement->bindValue(':account', $account);        
-        $statement->execute();
-        $fetch = $statement->fetch();
+        try{
+            $query = "SELECT * FROM credential WHERE account = :account";
+            $statement = $db->prepare($query);
+            $statement->bindValue(':account', $account);        
+            $statement->execute();
+            $fetch = $statement->fetch();
+        }catch(PDOException $e){
+             echo $e->getMessage();
+         }
         
         if(!isset($fetch['account'])){
             $statement->closeCursor();
+            try{
+                $query = "INSERT INTO user_info (first_name, last_name, email) VALUES (:first_name, :last_name, :email);";
+                $statement = $db->prepare($query);
+                $statement->bindValue(':first_name', $first_name);
+                $statement->bindValue(':last_name', $last_name);
+                $statement->bindValue(':email', $email);
+                $statement->execute();
+                $statement->closeCursor();
+            }catch(PDOException $e){
+                echo $e->getMessage();
+            }
 
-            $query = "INSERT INTO user_info (first_name, last_name, email) VALUES (:first_name, :last_name, :email);";
+            try{
+                $query = "SELECT * FROM user_info WHERE first_name = :first_name";
+                $statement = $db->prepare($query);
+                $statement->bindValue(':first_name', $first_name);        
+                $statement->execute();
+                $fetch = $statement->fetch();
+                $id = $fetch['id'];
+                $statement->closeCursor();
+            }catch(PDOException $e){
+                echo $e->getMessage();
+            }
 
-            $statement = $db->prepare($query);
-            $statement->bindValue(':first_name', $first_name);
-            $statement->bindValue(':last_name', $last_name);
-            $statement->bindValue(':email', $email);
-            $statement->execute();
-            $statement->closeCursor();
-
-            $query = "SELECT * FROM user_info WHERE first_name = :first_name";
-
-            $statement = $db->prepare($query);
-            $statement->bindValue(':first_name', $first_name);        
-            $statement->execute();
-            $fetch = $statement->fetch();
-            $id = $fetch['id'];
-            $statement->closeCursor();
-
+            try{
             $query = "INSERT INTO credential (id, account, passwd) VALUES (:id, :account, :password);";
             $statement = $db->prepare($query);
             $statement->bindValue(':id', $id);
@@ -80,7 +94,9 @@
             $statement->bindValue(':password', $hash_password);
             $statement->execute();
             $statement->closeCursor();
-
+            }catch(PDOException $e){
+                echo $e->getMessage();
+            }
 
             $_SESSION['user_first_name'] = $first_name;
             $_SESSION['id'] = $id;

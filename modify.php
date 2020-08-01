@@ -2,12 +2,12 @@
            
 session_start();
 if(isset($_SESSION['id'])){
-
+    
     require_once('connect.php');
     
     $first_name = filter_input(INPUT_POST, 'first_name');
     $last_name = filter_input(INPUT_POST, 'last_name');
-    $email = filter_input(INPUT_POST, 'email');
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     $password = filter_input(INPUT_POST, 'password');
     $cfpassword = filter_input(INPUT_POST, 'cfpassword');
     
@@ -37,22 +37,28 @@ if(isset($_SESSION['id'])){
     }
 
     if($ok === true){
+        try{
         $query = "UPDATE user_info SET first_name = :first_name, last_name = :last_name, email = :email;";
-
         $statement = $db->prepare($query);
         $statement->bindValue(':first_name', $first_name);
         $statement->bindValue(':last_name', $last_name);
         $statement->bindValue(':email', $email);
         $statement->execute();
         $statement->closeCursor();
-
+        }catch(PDOException $e){
+            echo $e->getMessage();
+        }
+        
+        try{
         $query_cred = "UPDATE credential SET passwd = :password;";
-
         $statement_cred = $db->prepare($query_cred);
         $hash_password = password_hash($password, PASSWORD_DEFAULT);
         $statement_cred->bindValue(':password', $hash_password);
         $statement_cred->execute();
         $statement_cred->closeCursor();
+        }catch(PDOException $e){
+            echo $e->getMessage();
+        }
 
         $_SESSION['isLogin'] = null;
         $_SESSION['id'] = null;

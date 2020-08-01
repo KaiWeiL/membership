@@ -12,6 +12,17 @@ CREATE TABLE user_info(
     PRIMARY KEY(id)
 );
 
+CREATE TABLE user_info_more(
+	id INT UNSIGNED,
+    location VARCHAR(20) NOT NULL,
+    social_media_URL VARCHAR(100),
+    skill VARCHAR(100),
+    image_id VARCHAR(200) NOT NULL,
+    PRIMARY KEY(id),
+	CONSTRAINT fk_user_more
+    FOREIGN KEY (id) REFERENCES user_info(id)
+);
+
 
 CREATE TABLE credential(
 	id INT UNSIGNED,

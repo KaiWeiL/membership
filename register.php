@@ -9,6 +9,7 @@
     if(isset($_SESSION['id'])){
             require_once('connect.php');
         
+         try{   
             $query = "SELECT * FROM user_info WHERE id = :id";
             $statement = $db->prepare($query);
             $statement->bindValue(':id', $_SESSION['id']);        
@@ -18,7 +19,11 @@
             $last_name = $fetch['last_name'];
             $email = $fetch['email'];
             $statement->closeCursor();
-            
+         }catch(PDOException $e){
+             echo $e->getMessage();
+         }
+         
+         try{
             $query_cred = "SELECT * FROM credential WHERE id = :id";
             $statement_cred = $db->prepare($query_cred);
             $statement_cred->bindValue(':id', $_SESSION['id']);        
@@ -26,6 +31,9 @@
             $fetch_cred = $statement_cred->fetch();
             $account = $fetch_cred['account'];
             $statement->closeCursor();
+         }catch(PDOException $e){
+             echo $e->getMessage();
+         }
     }
  
     if(isset($_SESSION['login_err'])){
@@ -46,7 +54,7 @@
       <h1>Login</h1>
     </header>
     <main>
-      <p><?php echo $_SESSION['login_err'];  $_SESSION['login_err'] = null;} else {$_SESSION['login_err'] = null;}?></p>
+      <p><?php foreach($_SESSION['login_err'] as $err_msg) echo $err_msg;  $_SESSION['login_err'] = null;} else {$_SESSION['login_err'] = null;}?></p>
       <form <?php if(!isset($_SESSION['id'])) echo "action=\"register_process.php\""; else echo "action=\"modify.php\"";?> method="post">
         <label for="fname">First Name  </label>
         <input type="text" name="first_name" class="form-control" id="first_name" value="<?php echo "$first_name";?>">

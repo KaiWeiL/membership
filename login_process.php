@@ -20,12 +20,16 @@
     }
 
         if($ok === true){
+            try{
             require_once('connect.php');
             $query = 'SELECT * FROM credential WHERE account = :account;';
             $statement = $db->prepare($query);
             $statement->bindValue(':account', $account);
             $statement->execute();
             $crential = $statement->fetch();
+            }catch(PDOException $e){
+                echo $e->getMessage();
+            }
 
                 if($statement->rowCount() > 2){
                     $_SESSION['login_err'] = "Something went wrong! Please Contact System Admin!";
